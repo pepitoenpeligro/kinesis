@@ -47,7 +47,3 @@ do
     fi
     
 done
-
-
-
-# CDK_ACCOUNT=030507416442 CDK_REGION='eu-west-1' CDK_STAGE='dev' CDK_CONTEXT_JSON=`jq '.context' cdk.json` cdk apply
