@@ -1,18 +1,38 @@
 import * as cdk from 'aws-cdk-lib';
-import { StreamMode } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class InputStreamStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const kinesis_stack = new cdk.aws_kinesis.Stream(this,'KinesisInputStream', {
-      streamMode: this.node.tryGetContext('streamMode') || "PROVISIONED",
-      retentionPeriod: cdk.Duration.hours(this.node.tryGetContext('retentionPeriod')) || 24,
-      shardCount: this.node.tryGetContext('shardCount') || 1,
-      streamName: this.node.tryGetContext('streamName') || "KinesisInputStream"
-    })
+    const contextData = this.node.tryGetContext('environment')
+    const stage : string = process.env.CDK_STAGE || 'dev'
     
+    const streamMode = contextData[stage]['streamMode']
+    const retentionPeriod = contextData[stage]['retentionPeriod']
+    const shardCount = contextData[stage]['shardCount']
+    const streamName = contextData[stage]['streamName']
+
+    const kinesis_stack = new cdk.aws_kinesis.Stream(this,'KinesisInputStream', {
+      streamMode: streamMode,
+      retentionPeriod: cdk.Duration.hours(retentionPeriod),
+      shardCount: shardCount,
+      streamName: streamName
+    })
+
+    const tags: { [key: string]: any } =  contextData[stage]['tags'] 
+
+    for (const key in tags) {
+      if (tags.hasOwnProperty(key)) {
+        kinesis_stack.stack.tags.setTag(key, tags[key])
+      }
+    }
+
+    new cdk.CfnOutput(this, "inputStreamArn", {
+      value: kinesis_stack.streamArn,
+      exportName: 'inputStreamArn'
+    });
+
+
   }
 }

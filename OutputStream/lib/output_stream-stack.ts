@@ -27,6 +27,11 @@ export class OutputStreamStack extends cdk.Stack {
         kinesis_stack.stack.tags.setTag(key, tags[key])
       }
     }
+
+    new cdk.CfnOutput(this, "outputStreamArn", {
+      value: kinesis_stack.streamArn,
+      exportName: 'outputStreamArn'
+    });
   
   }
 }
