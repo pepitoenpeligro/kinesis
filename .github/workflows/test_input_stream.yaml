@@ -56,8 +56,8 @@ jobs:
       - name: Install JQ
         shell: bash
         run: |
-           apt update
-           apt install jq -y
+           sudo apt update
+           sudo apt install jq -y
       
       - name: get context
         shell: bash
