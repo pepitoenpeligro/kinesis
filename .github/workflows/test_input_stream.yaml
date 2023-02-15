@@ -145,6 +145,8 @@ jobs:
 
 
   kinesis_analytics:
+
+    needs: [kinesis_input_stream, kinesis_output_stream]
     runs-on: ubuntu-latest
     
     permissions:
