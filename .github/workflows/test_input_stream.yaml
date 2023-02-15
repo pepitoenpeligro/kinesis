@@ -1,0 +1,138 @@
+name: "Test Kinesis Input Stream Infrastructure Model"
+
+on:
+  push:
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Enter Stage: dev / staggin/ pro'
+        required: true
+        default: 'dev'
+
+
+
+
+
+jobs:
+  test_kinesis_input_stream_infra:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      packages: read
+    steps:
+    
+      - uses: actions/checkout@v3
+
+      - name: Show event
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}">> $GITHUB_ENV
+          echo "CDK_STAGE=dev" >> $GITHUB_ENV
+
+      - name: Credentials to dev Environment
+        if: ${{ github.event.inputs.environment=='dev' }}
+        run: | 
+           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}">> $GITHUB_ENV
+           echo "CDK_STAGE=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Credentials to stagging Environment
+        if: ${{ github.event.inputs.environment=='stagging' }}
+        run: | 
+           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}">> $GITHUB_ENV
+           echo "CDK_STAGE=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Credentials to production Environment
+        if: ${{ github.event.inputs.environment=='pro' }}
+        run: | 
+           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}">> $GITHUB_ENV
+           echo "CDK_STAGE=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Install JQ
+        shell: bash
+        run: |
+           apt update
+           apt install jq -y
+      
+      - name: get context
+        shell: bash
+        working-directory: InputStream
+        
+        run: |
+          CDK_CONTEXT_JSON=`jq -c '.context' cdk.json`
+          echo "CDK_CONTEXT_JSON=$CDK_CONTEXT_JSON">> $GITHUB_ENV
+ 
+      - name: Install dependencies
+        working-directory: InputStream
+        run: |
+          npm ci
+
+      - name: Launch Test
+        working-directory: InputStream
+        run: |
+          npm run test
+
+  test_kinesis_output_stream_infra:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      packages: read
+    steps:
+    
+      - uses: actions/checkout@v3
+
+      - name: Show event
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}">> $GITHUB_ENV
+          echo "CDK_STAGE=dev" >> $GITHUB_ENV
+
+      - name: Credentials to dev Environment
+        if: ${{ github.event.inputs.environment=='dev' }}
+        run: | 
+           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}">> $GITHUB_ENV
+           echo "CDK_STAGE=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Credentials to stagging Environment
+        if: ${{ github.event.inputs.environment=='stagging' }}
+        run: | 
+           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}">> $GITHUB_ENV
+           echo "CDK_STAGE=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Credentials to production Environment
+        if: ${{ github.event.inputs.environment=='pro' }}
+        run: | 
+           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}">> $GITHUB_ENV
+           echo "CDK_STAGE=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Install JQ
+        shell: bash
+        run: |
+           apt update
+           apt install jq -y
+      
+      - name: get context
+        shell: bash
+        working-directory: OutputStream
+        
+        run: |
+          CDK_CONTEXT_JSON=`jq -c '.context' cdk.json`
+          echo "CDK_CONTEXT_JSON=$CDK_CONTEXT_JSON">> $GITHUB_ENV
+ 
+      - name: Install dependencies
+        working-directory: OutputStream
+        run: |
+          npm ci
+
+      - name: Launch Test
+        working-directory: OutputStream
+        run: |
+          npm run test
