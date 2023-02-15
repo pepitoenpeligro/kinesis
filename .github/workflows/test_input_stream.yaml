@@ -24,6 +24,8 @@ jobs:
     
       - name: "Checkout"
         uses: actions/checkout@v3
+        with:
+          repository: pepitoenpeligro/kinesis
 
       - name: Show event
         if: ${{ github.event_name == 'push' }}
@@ -117,8 +119,8 @@ jobs:
       - name: Install JQ
         shell: bash
         run: |
-           apt update
-           apt install jq -y
+           sudo apt update
+           sudo apt install jq -y
       
       - name: get context
         shell: bash
