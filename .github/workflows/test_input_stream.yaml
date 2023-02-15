@@ -17,9 +17,12 @@ on:
 jobs:
   test_kinesis_input_stream_infra:
     runs-on: ubuntu-latest
-    
+
     permissions:
       packages: read
+      contents: read
+      pull-requests: read
+
     steps:
     
       - name: "Checkout"
@@ -84,6 +87,9 @@ jobs:
     
     permissions:
       packages: read
+      contents: read
+      pull-requests: read
+      
     steps:
     
       - uses: actions/checkout@v3
