@@ -1,4 +1,4 @@
-name: "Test Kinesis Input Stream Infrastructure Model"
+name: "Test Infra Models"
 
 on:
   push:
@@ -22,7 +22,8 @@ jobs:
       packages: read
     steps:
     
-      - uses: actions/checkout@v3
+      - name: "Checkout"
+        uses: actions/checkout@v3
 
       - name: Show event
         if: ${{ github.event_name == 'push' }}
