@@ -12,7 +12,7 @@ on:
 
 
 jobs:
-  test_kinesis_input_stream_infra:
+  kinesis_input_stream:
     runs-on: ubuntu-latest
 
     permissions:
@@ -79,7 +79,7 @@ jobs:
         run: |
           npm run test
 
-  test_kinesis_output_stream_infra:
+  kinesis_output_stream:
     runs-on: ubuntu-latest
     
     permissions:
@@ -144,7 +144,7 @@ jobs:
           npm run test
 
 
-  test_kinesis_analytics:
+  kinesis_analytics:
     runs-on: ubuntu-latest
     
     permissions:
