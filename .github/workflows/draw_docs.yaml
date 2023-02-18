@@ -9,6 +9,7 @@ on:
 jobs:
 
   draw:
+  
     permissions:
       packages: read
       contents: read

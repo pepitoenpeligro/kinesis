@@ -9,6 +9,7 @@ from diagrams.aws.analytics import Kinesis, KinesisDataAnalytics, KinesisDataStr
 
 with Diagram(name="Dementia Realtime Analytics", show=True, direction="LR" ):
         
+        
         kinesisInput = KinesisDataStreams("InputStram")
         kinesisAnalytics = KinesisDataAnalytics("Analytics")
 
