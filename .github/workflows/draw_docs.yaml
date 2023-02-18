@@ -30,9 +30,8 @@ jobs:
           python architecture.py
 
       - uses: actions/upload-artifact@v3
-        working-directory: docs/diagrams
         with:
           name: artefacto
-          path: dementia_realtime_analytics.png
+          path: docs/diagrams/dementia_realtime_analytics.png
 
         
