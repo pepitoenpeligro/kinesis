@@ -1,0 +1,38 @@
+name: "Draw Infra Docs"
+
+on:
+  push:
+    paths:
+      - 'docs/**'
+
+
+jobs:
+
+  draw:
+    permissions:
+      packages: read
+      contents: read
+      pull-requests: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Install Diagrams package
+        run: |
+          pip install diagrams
+
+      - name: Generate diagram
+        working-directory: docs/diagrams
+        run: |
+          python architecture.py
+
+      - uses: actions/upload-artifact@v3
+        working-directory: docs/diagrams
+        with:
+          name: artefacto
+          path: dementia_realtime_analytics.png
+
+        
