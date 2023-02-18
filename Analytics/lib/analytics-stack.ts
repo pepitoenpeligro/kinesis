@@ -1,7 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { aws_kinesisanalyticsv2 as kinesisanalyticsv2 } from 'aws-cdk-lib';
-
+import * as lambda from 'aws-cdk-lib'
+import * as fs from 'fs'
+import * as path from 'path'
 
 
 export class AnalyticsStack extends cdk.Stack {
@@ -14,15 +16,15 @@ export class AnalyticsStack extends cdk.Stack {
 
     streamToAnalyticsRole.addToPolicy(new cdk.aws_iam.PolicyStatement({
       resources: [
-        cdk.Fn.importValue("inputStreamArn")
-        // "arn:aws:kinesis:eu-west-1:030507416442:stream/FlujoDatos"
+        cdk.Fn.importValue("inputStreamArn"),
+        cdk.Fn.importValue("outputStreamArn"),
       ],
       actions: ['kinesis:*', 'lambda:*'] 
     }));
 
     const thresholdDetector = new cdk.aws_kinesisanalytics.CfnApplication(this, "KinesisAnalyticsApplication", {
       applicationName: 'abnormality-detector',
-      applicationCode: "",
+      applicationCode: fs.readFileSync(path.join(__dirname, 'src/stream_processor.sql')).toString(),
       inputs: [
         {
           namePrefix: "SOURCE_SQL_STREAM",
@@ -36,209 +38,124 @@ export class AnalyticsStack extends cdk.Stack {
               recordFormatType: "JSON",
               mappingParameters: { jsonMappingParameters: { recordRowPath: "$" } }
             },
-            recordEncoding: "UTF-8",
+            recordEncoding: 'UTF-8',
             recordColumns: [
               {
-                name: "transactionId",
-                mapping: "$.transactionId",
-                sqlType: "VARCHAR(64)"
+                name: "client_id",
+                mapping: "$.tenant.id",
+                sqlType: "VARCHAR(32)"
               },
               {
                   name: "name",
-                  mapping: "$.name",
+                  mapping: "$.tenant.name",
                   sqlType: "VARCHAR(64)"
               },
               {
-                  name: "age",
-                  mapping: "$.age",
-                  sqlType: "INTEGER"
-              },
-              {
-                  name: "address",
-                  mapping: "$.address",
-                  sqlType: "VARCHAR(256)"
-              },
-              {
-                  name: "city",
-                  mapping: "$.city",
+                  name: "tier",
+                  mapping: "$.tenant.tier",
                   sqlType: "VARCHAR(32)"
               },
               {
-                  name: "state",
-                  mapping: "$.state",
-                  sqlType: "VARCHAR(32)"
+                  name: "latitude",
+                  mapping: "$.location.latitude",
+                  sqlType: "DOUBLE"
               },
               {
-                  name: "transaction",
-                  mapping: "$.transaction",
-                  sqlType: "INTEGER"
+                  name: "longitude",
+                  mapping: "$.location.longitude",
+                  sqlType: "DOUBLE"
               },
               {
-                  name: "bankId",
-                  mapping: "$.bankId",
-                  sqlType: "VARCHAR(32)"
-              },
-              {
-                  name: "createdAt",
-                  mapping: "$.createdAt",
-                  sqlType: "VARCHAR(32)"
+                  name: "COL_user",
+                  mapping: "$.metadata.user",
+                  sqlType: "VARCHAR(64)"
               }
             ]
           }
         }
-      ]
+      ],
     })
-    // thresholdDetector.node.addDependency(streamToAnalyticsRole);
+
+    thresholdDetector.node.addDependency(streamToAnalyticsRole);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // // const sqlApplicationConfigurationProperty: kinesisanalyticsv2.CfnApplication.SqlApplicationConfigurationProperty = {
-    // const sqlApplicationConfigurationProperty: kinesisanalyticsv2.CfnApplicationProps = {
-    //   inputs: [{
-    //     inputSchema: {
-    //       recordColumns: [{
-    //         name: 'name',
-    //         sqlType: 'sqlType',
-    
-    //         // the properties below are optional
-    //         mapping: 'mapping',
-    //       }],
-    //       recordFormat: {
-    //         recordFormatType: 'recordFormatType',
-    
-    //         // the properties below are optional
-    //         mappingParameters: {
-    //           csvMappingParameters: {
-    //             recordColumnDelimiter: 'recordColumnDelimiter',
-    //             recordRowDelimiter: 'recordRowDelimiter',
-    //           },
-    //           jsonMappingParameters: {
-    //             recordRowPath: 'recordRowPath',
-    //           },
-    //         },
-    //       },
-    
-    //       // the properties below are optional
-    //       recordEncoding: 'recordEncoding',
-    //     },
-    //     namePrefix: 'namePrefix',
-    
-    //     // // the properties below are optional
-    //     // inputParallelism: {
-    //     //   count: 123,
-    //     // },
-    //     // inputProcessingConfiguration: {
-    //     //   inputLambdaProcessor: {
-    //     //     resourceArn: 'resourceArn',
-    //     //   },
-    //     // },
-        
-    //     // kinesisStreamsInput: {
-    //     //   resourceArn: 'resourceArn',
-    //     // },
-    //   }],
-    // };
-
-  
-    const applicationConfigurationProperty: kinesisanalyticsv2.CfnApplication.ApplicationConfigurationProperty = {
-      environmentProperties: {
-        propertyGroups: [{
-          propertyGroupId: 'propertyGroupId',
-          propertyMap: {
-            propertyMapKey: 'propertyMap',
-          },
-        }],
+    const abnormalNotificationTopic = new cdk.aws_sns.Topic(
+      this,
+      'AbnormalNotification',
+      {
+        displayName: 'Abnormal detected topic',
       },
-      sqlApplicationConfiguration: {
-        inputs: [{
-          inputSchema: {
-            recordColumns: [{
-              name: 'name',
-              sqlType: 'sqlType',
-    
-              // the properties below are optional
-              mapping: 'mapping',
-            }],
-            recordFormat: {
-              recordFormatType: 'recordFormatType',
-    
-              // the properties below are optional
-              mappingParameters: {
-                csvMappingParameters: {
-                  recordColumnDelimiter: 'recordColumnDelimiter',
-                  recordRowDelimiter: 'recordRowDelimiter',
-                },
-                jsonMappingParameters: {
-                  recordRowPath: 'recordRowPath',
-                },
-              },
-            },
-    
-            // the properties below are optional
-            recordEncoding: 'recordEncoding',
-          },
-          namePrefix: 'lapp',
-    
-          inputProcessingConfiguration: {
-            inputLambdaProcessor: {
-              resourceArn: 'resourceArn',
-            },
-          },
-          kinesisFirehoseInput: {
-            resourceArn: 'resourceArn',
-          },
-          kinesisStreamsInput: {
-            resourceArn: 'resourceArn',
-          },
-        }],
+    )
+    abnormalNotificationTopic.addSubscription(
+      new cdk.aws_sns_subscriptions.EmailSubscription('joseant.cg@outlook.com'),
+    )
+
+    const fanoutLambda = new cdk.aws_lambda.Function(this, 'LambdaFanoutFunction', {
+      runtime: cdk.aws_lambda.Runtime.PYTHON_3_8,
+      handler: 'fanout.handler',
+      code: cdk.aws_lambda.Code.fromAsset('lib/src'),
+      environment: {
+        TOPIC_ARN: abnormalNotificationTopic.topicArn,
       },
-
-      
-    };
+    })
 
 
-    
+    abnormalNotificationTopic.grantPublish(fanoutLambda)
 
-    // new kinesisanalyticsv2.CfnApplication(this,'elid', applicationConfigurationProperty );
-    // const appSQL =  new cdk.aws_kinesisanalyticsv2.CfnApplication(this, 'id',  );
+
+    streamToAnalyticsRole.addToPolicy(new cdk.aws_iam.PolicyStatement({
+      resources: [
+        fanoutLambda.functionArn
+      ],
+      actions: ['kinesis:*', 'lambda:*'] 
+    }));
+
+
+    const thresholdDetectorOutput = new cdk.aws_kinesisanalytics.CfnApplicationOutput(
+      this,
+      'AnalyticsAppOutput',
+      {
+        applicationName: 'abnormality-detector',
+        output: {
+          
+          name: 'DESTINATION_SQL_STREAM',
+          // kinesisStreamsOutput: {
+          //   resourceArn: cdk.Fn.importValue("outputStreamArn"),
+          //   roleArn: streamToAnalyticsRole.roleArn,
+          // },
+          lambdaOutput: {
+            resourceArn: fanoutLambda.functionArn,
+            roleArn: streamToAnalyticsRole.roleArn,
+          },        
+          destinationSchema: {
+            recordFormatType: 'JSON',
+          },
+        },
+      },
+    )
+
+
+    const thresholdDetectorOutputKinesis = new cdk.aws_kinesisanalytics.CfnApplicationOutput(
+      this,
+      'AnalyticsAppOutputKinesis',
+      {
+        applicationName: 'abnormality-detector',
+        output: {
+          
+          name: 'DESTINATION_SQL_STREAM_GREATER_2',
+          kinesisStreamsOutput: {
+            resourceArn: cdk.Fn.importValue("outputStreamArn"),
+            roleArn: streamToAnalyticsRole.roleArn,
+          },
+
+          destinationSchema: {
+            recordFormatType: 'JSON',
+          },
+        },
+      },
+    )
+
+    thresholdDetectorOutput.node.addDependency(thresholdDetector);
+
   }
 }
