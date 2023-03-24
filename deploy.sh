@@ -7,7 +7,7 @@ CDK_REGION='eu-west-1'
 CDK_STAGE='dev'
 
 CDK_ACTIONS=('deploy' 'destroy')
-CDK_SELECTED_ACTION=0
+CDK_SELECTED_ACTION=1
 
 
 cd $BASE_DIR/InputStream

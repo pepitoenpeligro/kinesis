@@ -15,7 +15,11 @@ exports.handler = async function (event: APIGatewayProxyEvent): Promise<APIGatew
 
 	if (!event.body) {
 		return {
-			statusCode: 400,
+			statusCode: 404,
+			headers: {
+				'Access-Control-Allow-Headers': '*',
+				'Access-Control-Allow-Origin': '*',
+			},
 			body: JSON.stringify({
 				message: 'You must provide an email and password',
 			}),
@@ -37,6 +41,10 @@ exports.handler = async function (event: APIGatewayProxyEvent): Promise<APIGatew
 
 		return {
 			statusCode: 200,
+			headers: {
+				'Access-Control-Allow-Headers': '*',
+				'Access-Control-Allow-Origin': '*'
+			},
 			body: JSON.stringify({
 				message: res,
 			}),
@@ -44,7 +52,11 @@ exports.handler = async function (event: APIGatewayProxyEvent): Promise<APIGatew
 	} catch (err) {
 		console.error(err);
 		return {
-			statusCode: 500,
+			statusCode: 404,
+			headers: {
+				'Access-Control-Allow-Headers': '*',
+				'Access-Control-Allow-Origin': '*',
+			},
 			body: JSON.stringify({
 				message: err,
 			}),

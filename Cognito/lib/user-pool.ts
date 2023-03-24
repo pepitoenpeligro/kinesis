@@ -1,5 +1,5 @@
 import { RemovalPolicy } from 'aws-cdk-lib';
-import { UserPool } from 'aws-cdk-lib/aws-cognito';
+import { UserPool, AutoVerifiedAttrs } from 'aws-cdk-lib/aws-cognito';
 import { Construct } from 'constructs';
 
 export class CognitoUserPool extends Construct {
@@ -12,6 +12,7 @@ export class CognitoUserPool extends Construct {
 		const userPool = new UserPool(this, 'UserPool', {
 			signInAliases: { username: true, email: true },
 			selfSignUpEnabled: true,
+			autoVerify: {email: true },
 			removalPolicy: RemovalPolicy.DESTROY,
 		});
 

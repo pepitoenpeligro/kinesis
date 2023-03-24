@@ -27,6 +27,7 @@ export class ProtectedApi extends Construct {
 			endpointTypes: [EndpointType.REGIONAL],
 			defaultCorsPreflightOptions: {
 				allowOrigins: Cors.ALL_ORIGINS,
+				allowMethods: Cors.ALL_METHODS
 			},
 		});
 
@@ -46,13 +47,19 @@ export class ProtectedApi extends Construct {
 			entry: './lambda/protected.ts',
 		});
 
+
+		// const insertLocation = new NodejsFunction(this, 'InsertLocationFn', {
+		// 	...commonFnProps,
+		// 	entry: './lambda/insert-location.ts',
+		// });
+
 		const authorizerFn = new NodejsFunction(this, 'AuthorizerFn', {
 			...commonFnProps,
 			entry: './lambda/auth/authorizer.ts',
 		});
 
 		const requestAuthorizer = new RequestAuthorizer(this, 'RequestAuthorizer', {
-			identitySources: [IdentitySource.header('cookie')],
+			identitySources: [IdentitySource.header('Cookie')],
 			handler: authorizerFn,
 			resultsCacheTtl: Duration.minutes(0),
 		});
@@ -61,5 +68,12 @@ export class ProtectedApi extends Construct {
 			authorizer: requestAuthorizer,
 			authorizationType: AuthorizationType.CUSTOM,
 		});
+
+		// protectedRes.addMethod('POST',new LambdaIntegration(insertLocation), {
+		// 	authorizer: requestAuthorizer,
+		// 	authorizationType: AuthorizationType.CUSTOM,
+		// })
+
+		
 	}
 }

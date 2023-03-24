@@ -4,8 +4,9 @@ import { InitiateAuthRequest } from 'aws-sdk/clients/cognitoidentityserviceprovi
 
 const cognito = new CognitoIdentityServiceProvider();
 
+
 exports.handler = async function (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-	console.log('[EVENT]', event);
+	console.log('[SIGNIN-evento]', event);
 
 	if (!event.body) {
 		return {
@@ -27,13 +28,19 @@ exports.handler = async function (event: APIGatewayProxyEvent): Promise<APIGatew
 		},
 	};
 
+	
+
 	try {
 		const { AuthenticationResult } = await cognito.initiateAuth(params).promise();
 		console.log('[AUTH]', AuthenticationResult);
 
 		if (!AuthenticationResult) {
 			return {
-				statusCode: 400,
+				statusCode: 404,
+				headers: {
+					'Access-Control-Allow-Headers': '*',
+					'Access-Control-Allow-Origin': '*',
+				},
 				body: JSON.stringify({
 					message: 'User signin failed',
 				}),
@@ -58,7 +65,11 @@ exports.handler = async function (event: APIGatewayProxyEvent): Promise<APIGatew
 		console.error(err);
 
 		return {
-			statusCode: 500,
+			statusCode: 404,
+			headers: {
+				'Access-Control-Allow-Headers': '*',
+				'Access-Control-Allow-Origin': '*',
+			},
 			body: JSON.stringify({
 				message: err,
 			}),

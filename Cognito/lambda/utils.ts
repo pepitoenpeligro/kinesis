@@ -23,6 +23,9 @@ export type Jwk = {
 };
 
 export const parseCookies = (event: APIGatewayRequestAuthorizerEvent | APIGatewayProxyEvent) => {
+	console.log("[parseCookie]")
+	console.log(event.headers)
+	
 	if (!event.headers || !event.headers.Cookie) {
 		return undefined;
 	}
@@ -39,6 +42,16 @@ export const parseCookies = (event: APIGatewayRequestAuthorizerEvent | APIGatewa
 
 	return cookieMap;
 };
+
+export const parseAuthorization = (event: APIGatewayRequestAuthorizerEvent | APIGatewayProxyEvent) => {
+	if (!event.headers || !event.headers.Authorization || !event.headers.authorization) {
+		return undefined;
+	}
+
+	const authorizationToken: string = event.headers.Authorization || event.headers.authorization;
+
+	return authorizationToken;
+} 
 
 export const verifyToken = async (token: string, userPoolId: string): Promise<JwtToken> => {
 	try {
